@@ -61,6 +61,8 @@ public:
 	void adaptedBreadthFirst( Node* pCurrent, Node* pGoal );	
 	void aStar(Node* pStart, Node* pDest, void(*pProcess)(Node*), std::vector<Node *>& path);
 
+	// Updated Functor - Includes heuristics in search
+	//////////////////////////
 	class NodeSearchCostComparer {
 	public:
 		bool operator()(Node * n1, Node * n2) {
@@ -380,28 +382,66 @@ void Graph<NodeType, ArcType>::adaptedBreadthFirst( Node* pCurrent, Node *pGoal 
       }
    }  
 }
-// Jason Power was coding here
+// A* Assignment
 ////////////////////////////////
+/*
+ A* is a combination of Dijkstra's algorithm and a heuristic pathfinder.
+ A heuristic is a process for evaluating each node based on distance.
+ To calculate the heuristic we used the distance formula from every node to the end node.
+
+ Similar to UCS, except we add an extra cost to determine the shortest path.
+
+ f(n) = h(n) + g(n)
+ Where
+	h(n) - distance from the current node to the goal node.
+	g(n) - cost so far to reach n "Weights + costs added up".
+	f(n) - total cost of the path though n to the end node.
+
+
+ Again similar to UCS, Parent node expands its children and sets the next
+ highest priority node based on the smallest f(n).
+
+ However A* does not search every node nor search in every direction.
+ It selects the node that is closer to the goal and searches
+ the best path in the direction to the goal.
+
+ If h(n) = 0, A* becomes Dijkstra's.
+ If h(n) > cost of moving - Find the correct path but is slow.
+ If h(n) < cost of moving - Not guaranteed to find the fastest path but it can run faster.
+*/
 
 template<class NodeType, class ArcType>
 void Graph<NodeType, ArcType>::aStar(Node* pStart, Node* pDest, void(*pProcess)(Node*), std::vector<Node *>& path)
 {
+	// Set up Priority Queue
 	priority_queue<Node *, vector<Node *>, NodeSearchCostComparer> pq;
+
+	// Add the start node to the queue
 	pq.push(pStart);
 
+	// Set the start nodes cost data to 0
 	pStart->setData(NodeType(get<0>(pStart->data()), 0, get<2>(pStart->data())));
-	pStart->SetText("    " + (get<0>(pStart->data())) + "\n" + " C-" + std::to_string((get<1>(pStart->data()))) + "\n" + " H-" + std::to_string((get<2>(pStart->data()))));
+	
+	// Mark the first node
 	pStart->setMarked(true);
+	
+	// EXTRA - Set a string for the data to be printed on the node
+	pStart->SetText("    " + (get<0>(pStart->data())) + "\n" + " C-" + std::to_string((get<1>(pStart->data()))) + "\n" + " H-" + std::to_string((get<2>(pStart->data()))));
 
+
+	// While the priority queue is not empty and top node of the pq is not equal to the end node
 	while (pq.size() != 0 && pq.top() != pDest)
 	{
+		// Iterator
 		list<Arc>::const_iterator iter = pq.top()->arcList().begin();
 		list<Arc>::const_iterator endIter = pq.top()->arcList().end();
+
+		// Loop through all the connecting nodes in the arc list
 		for (; iter != endIter; iter++)
 		{
 			if ((*iter).node() != pq.top()->previous())
 			{
-				//// Heuristic Cost A star
+				// Heuristic Cost
 				int hCost = get<2>(pq.top()->data());
 
 				// Total Weight Cost
@@ -413,21 +453,33 @@ void Graph<NodeType, ArcType>::aStar(Node* pStart, Node* pDest, void(*pProcess)(
 				// Childs Total Cost
 				int currF = get<1>((*iter).node()->data()) + get<2>((*iter).node()->data());
 
+				// if the pq.top nodes total cost, is less than the connecting nodes total cost
 				if (distC < currF)
 				{
-					//A Star
+					// Update the connecting nodes total cost
 					(*iter).node()->setData(NodeType(get<0>((*iter).node()->data()), gCost, get<2>((*iter).node()->data())));
+
+					// Set the connecting nodes previous to the top of the priority queue
 					(*iter).node()->setPrevious(pq.top());
+
+					// EXTRA - setting values to be seen on the node
 					(*iter).node()->SetText("    " + (get<0>((*iter).node()->data())) + "\n" + " C-" + std::to_string(gCost) + "\n" + " H-" + std::to_string((get<2>((*iter).node()->data()))));
 				}
+				// If the connecting node is not marked
 				if (!(*iter).node()->marked())
 				{
+					// Push it to the priority queue
 					pq.push((*iter).node());
+
+					// Mark the node
 					(*iter).node()->setMarked(true);
+
+					// EXTRA - Change color of the node as to show it has been marked
 					(*iter).node()->SetColor(sf::Color(0, 0, 255));
 				}
 			}
 		}
+		// Pop from the prioriy queue
 		pq.pop();
 	}
 	// Printy out function

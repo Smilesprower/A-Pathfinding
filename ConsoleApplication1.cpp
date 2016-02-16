@@ -163,6 +163,9 @@ int main(int argc, char *argv[])
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Left)|| sf::Mouse::isButtonPressed(sf::Mouse::Right))
 			{
 				sf::IntRect mouseRect(sf::Mouse::getPosition(App).x, sf::Mouse::getPosition(App).y, 1, 1);
+
+				// Reset Function
+				////////////////////////////
 				if (aStar)
 				{
 					sf::IntRect resetRect((int)resetRectShape.getPosition().x, (int)resetRectShape.getPosition().y, (int)resetRectShape.getSize().x, (int)resetRectShape.getSize().y);
@@ -180,6 +183,8 @@ int main(int argc, char *argv[])
 						}
 					}
 				}
+				// A Star Function
+				////////////////////////////
 				else if (endNode && startNode)
 				{
 				
@@ -194,6 +199,8 @@ int main(int argc, char *argv[])
 				}
 
 			}
+			// Select Start Node
+			////////////////////////////
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && !startNode)
 			{
 				sf::IntRect mouseRect(sf::Mouse::getPosition(App).x, sf::Mouse::getPosition(App).y, 1, 1);
@@ -207,6 +214,8 @@ int main(int argc, char *argv[])
 					}
 				}
 			}
+			// Select Start Node
+			////////////////////////////
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Right) && !endNode)
 			{
 				sf::IntRect mouseRect(sf::Mouse::getPosition(App).x, sf::Mouse::getPosition(App).y, 1, 1);
