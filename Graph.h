@@ -513,7 +513,68 @@ void Graph<NodeType, ArcType>::aStar(Node* pStart, Node* pDest, void(*pProcess)(
 			pProcess(path.at(i));
 	}
 }
+/*
+template<class NodeType, class ArcType>
+void Graph<NodeType, ArcType>::ucs(Node pStart, Node pDest, void(*pVisit)(Node), std::vector<Node >& path)
+{
+	priority_queue<Node, vector<Node >, NodeSearchCostComparer> pq;
+	pq.push(pStart);
 
+	pStart->setData(NodeType(get<0>(pStart->data()), 0, 0));
+	pStart->setMarked(true);
+
+	// while the queue is not empty AND pq.top != goal
+	while (pq.size() != 0 && pq.top() != 0)
+	{
+		list<Arc>::const_iterator iter = pq.top()->arcList().begin();
+		list<Arc>::const_iterator endIter = pq.top()->arcList().end();
+		for (; iter != endIter; iter++)
+		{
+			if ((*iter).node() != pq.top()->previous())
+			{
+				int dist = (*iter).weight() + get<1>(pq.top()->data());
+				int curDist = get<1>((*iter).node()->data());
+
+				// if distance is less than child distance
+				if (dist < curDist)
+				{
+					// This is where we calculate the 90% of the heuristic cost
+					(iter).node()->setData(NodeType(get<0>((*iter).node()->data()), dist, dist * 0.9f));
+					(*iter).node()->setPrevious(pq.top());
+				}
+
+				// if not marked
+				if ((*iter).node()->marked() == false)
+				{
+					pq.push((*iter).node()); // add the child to the pq
+					(*iter).node()->setMarked(true); // and mark it
+				}
+				// end of iteration
+			}
+
+		}
+		pq.pop();
+	}
+
+	// print out the elements
+	Node* print = pDest;
+
+	while (print->previous() != 0)
+	{
+		path.push_back(print);
+		print = print->previous();
+	}
+	path.push_back(pStart);
+
+	// otherwise prints last to first element in path
+	std::reverse(path.begin(), path.end());
+
+	for (int i = 0; i < path.size(); i++)
+	{
+		pVisit(path.at(i)); // output for each element in path
+	}
+}
+*/
 
 #include "GraphNode.h"
 #include "GraphArc.h"
